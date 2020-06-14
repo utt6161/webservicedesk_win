@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" >
+
+<head>
+    <div th:replace="base::links"></div>
+</head>
+<body>
+<div th:replace="base::header"></div>
+
+<main role="main" class="container">
+
+    <form th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}" th:action="@{/users/search}" method="POST">
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="mode_select">Поиск по</label>
+                <select name="mode" class="custom-select" id="mode_select">
+                    <option th:selected="${usr_mode.equals('n')}" value="n">Имени</option>
+                    <option th:selected="${usr_mode.equals('e')}" value="e">Email</option>
+                    <option th:selected="${usr_mode.equals('p')}" value="p">Номеру</option>
+                    <option th:selected="${usr_mode.equals('f')}" value="f">ФИО</option>
+                    <option th:selected="${usr_mode.equals('d')}" value="d">Должности</option>
+                    <option th:selected="${usr_mode.equals('s')}" value="s">Статусу</option>
+
+                </select>
+            </div>
+            <th:block th:if = "${usr_mode.equals('s')==false}">
+                <input id = "query_input" th:value="${searchQuery}"
+                       type="text" name="search" class="form-control" required
+                       aria-label="Text input with segmented select and label">
+            </th:block>
+            <th:block th:if = "${usr_mode.equals('s')}">
+                <select name="search" class="form-control" id="status_select">
+                    <option th:selected="${searchQuery.equals('false')}"  value="false">Неактивеный</option>
+                    <option th:selected="${searchQuery.equals('true')}"  value="true">Активеный</option>
+                </select>
+            </th:block>
+            <button type="submit" class="btn btn-outline-secondary">Найти</button>
+        </div>
+    </form>
+
+
+
+    <!--    <div class="text-center">-->
+    <!--        <h3 th:text = "'Результаты по запросу: ' + ${searchQuery}"> </h3>-->
+    <!--    </div>-->
+
+    <th:block th:if = "${users != null && users.getTotalElements() > 0}">
+        <h6>Результаты поиска по вашему запросу:</h6>
+        <p style = "font-size: 14px;" th:text = "'Число результатов: ' + ${users.getTotalElements()}"></p>
+        <table th:if = "${users.getTotalElements()>0}" class="table table-striped">
+            <tr th:each = "user : ${users}">
+                <td>
+                    <div class="card">
+                        <h5 class="card-header" th:text = "${user.getFullname() + ' : ' + user.getPost()}"></h5>
+                        <div class="card-body">
+
+
+                            <h5 class="card-title" th:text = "${user.getUsername()}"></h5>
+                            <div class = "d-flex justify-content-start" style = "padding-bottom: 15px;">
+                                <div>
+                                    <p class="card-text"><strong>Номер: </strong></p>
+                                    <p class="card-text" th:text = "${user.getPhonenumber()}"></p>
+                                </div>
+                                <div style = "padding-left: 25px;">
+                                    <p class="card-text"><strong>Email: </strong></p>
+                                    <p class="card-text" th:text = "${user.getEmail()}"></p>
+                                </div>
+                            </div>
+                            <div class = "d-flex justify-content-between">
+                                <div class = "d-flex justify-content-start">
+                                    <a class = "btn btn-dark bg-black" th:href = "@{/users/id/{id}(id = ${user.getId()})}">Профиль</a>
+                                    <th:block th:if = "${user.isActive() && (user.getRoles().toArray()[0].getRole().equals('USER')==true)}"><a class = "btn btn-dark bg-black" th:href = "@{/users/id/{id}/deactivate(id = ${user.getId()})}">Деактивировать</a></th:block>
+                                    <th:block th:unless = "${user.isActive()}"><a class = "btn btn-dark bg-black" th:href = "@{/users/id/{id}/activate(id = ${user.getId()})}">Активировать</a></th:block>
+                                </div>
+                                <div th:if = "${#authorization.expression('hasAuthority(''ADMIN'')') && (user.getRoles().toArray()[0].getRole().equals('ADMIN')!=true)}">
+                                    <a class = "btn btn-danger"
+                                       th:href = "@{/users/delete/id/{id}(id = ${user.getId()})}">Удалить</a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </td>
+
+
+
+            </tr>
+        </table>
+    </th:block>
+    <th:block th:if = "${users != null && users.getTotalElements()==0}">
+        <p><em>Поиск по вашему запросу не принес результатов</em></p>
+    </th:block>
+
+    <th:block th:if = "${users != null && users.getTotalPages() gt 1}">
+        <nav aria-label="Pagination" th:if="${users.totalPages gt 1}">
+            <ul class="pagination justify-content-center font-weight-medium">
+                <li class="page-item" th:classappend="${users.number lt 2} ? 'disabled'">
+                    <a class="page-link svg-icon"
+                       th:href="@{/users/{searchQuery}/1(searchQuery = ${searchQuery})}"
+                       aria-label="Previous"
+                       title="First Page" rel="tooltip">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${users.number eq 0} ? 'disabled'">
+                    <a class="page-link svg-icon"
+                       th:href="@{/users/{searchQuery}/{id}(id=${users.number lt 2 ? 1 : users.number - 1},searchQuery = ${searchQuery})}"
+                       aria-label="Previous"
+                       title="Previous Page" rel="tooltip">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${i eq users.number + 1} ? 'active'"
+                    th:each="i : ${#numbers.sequence( users.number + 1, users.totalPages > 10 + users.number ? users.number + 10: users.totalPages, 1)}">
+                    <a class="page-link" th:href="@{/users/{searchQuery}/{id}(id=${i},searchQuery = ${searchQuery})}" th:text="${i}"
+                       th:title="${'Page '+ i}"
+                       rel="tooltip"></a>
+                </li>
+                <li class="page-item disabled" th:if="${users.number + 10 < users.totalPages}">
+                    <a class="page-link svg-icon" href="#">
+                        ...
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${users.number + 1 eq users.totalPages} ? 'disabled'">
+                    <a class="page-link svg-icon" th:href="@{/users/{searchQuery}/{id}(id=${users.number + 2},searchQuery = ${searchQuery})}"
+                       aria-label="Next"
+                       title="Next Page" rel="tooltip">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${users.number gt (users.totalPages - 2) } ? 'disabled'">
+                    <a class="page-link svg-icon"
+                       th:href="@{/users/{searchQuery}/{id}(id=${users.totalPages}, searchQuery = ${searchQuery})}"
+                       aria-label="Previous"
+                       title="First Page" rel="tooltip">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </th:block>
+
+</main>
+
+<div th:replace="base::footer"></div>
+<script th:src="@{/js/user_select.js}"></script>
+</body>
+</html>

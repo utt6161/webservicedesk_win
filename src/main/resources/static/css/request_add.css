@@ -1,0 +1,6 @@
+.red-clear{
+    color:white !important;
+    background-color: #ba0018 !important;
+    cursor: pointer !important;
+    transition-duration: 0.4s;
+}

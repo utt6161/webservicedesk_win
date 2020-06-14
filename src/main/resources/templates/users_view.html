@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <div th:replace="base::links"></div>
+    <meta th:content="${_csrf.token}" th:name="${_csrf.parameterName}"/>
+</head>
+<body>
+<div th:replace="base::header"></div>
+
+<main role="main" class="container">
+
+    <input type = "hidden" id = "user_id" th:value="${user.getId()}">
+    <th:block th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}">
+        <div class="d-flex justify-content-between">
+            <div>
+                <a th:href="@{/users/id/{user_id}/edit(user_id = ${user.getId()})}" class="btn m-1 btn-dark bg-black">Редактировать?</a>
+                <a th:if = "${user.isActive() && (user.getRoles().toArray()[0].getRole().equals('USER')==true)}" th:href="@{/users/id/{id}/deactivate(id = ${user.getId()})}" class="btn m-1 btn-dark bg-black">Деактивировать</a>
+                <a th:unless = "${user.isActive()}" th:href="@{/users/id/{id}/activate(id = ${user.getId()})}" class="btn m-1 btn-dark bg-black">Активировать</a>
+            </div>
+            <div style = "width: 200px;" th:if = "${#authorization.expression('hasAuthority(''ADMIN'')') && (user.getRoles().toArray()[0].getRole().equals('ADMIN')!=true)}">
+                <select id = "role" name = "role" class="form-control m-1">
+                    <option th:selected = "${user.getRoles().toArray()[0].getRole().equals('USER')==true}"
+                            value = "2">
+                        Пользователь
+                    </option>
+                    <option th:selected = "${user.getRoles().toArray()[0].getRole().equals('EDIT')==true}"
+                            value = "3">
+                        Редактор
+                    </option>
+                </select>
+            </div>
+        </div>
+    </th:block>
+    <div class = 'justify-content-center form-group'>
+        <h4>Логин:</h4>
+        <h5 th:text = "${user.getUsername()}"></h5>
+        <h4>ФИО: </h4>
+        <h5 th:text="${user.getFullname() + ' : ' + user.getPost()}"></h5>
+        <h4>Контакты: </h4>
+        <p th:text = "${'Номер телефона: ' + user.getPhonenumber()} "></p>
+        <p th:text = "${'Email: ' + user.getEmail()} "></p>
+    </div>
+
+    <th:block th:if = "${requests != null && requests.getTotalElements() > 0}">
+        <h5>Заявки пользователя: </h5>
+        <table class="table table-striped">
+            <tr th:each = "request : ${requests}">
+                <td>
+                    <div class="card">
+                        <h5 class="card-header" th:text = "${request.getTitle().length()>90 ? request.getTitle().substring(0,90) + '...' : request.getTitle()}"></h5>
+                        <div class="card-body">
+
+                            <th:block th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}">
+                                <h5 class="card-title" th:text = "${request.user.getFullname() + ' : ' + request.user.getPost()}">
+                                </h5>
+                                <p>Логин: <a style = "font-size: x-large" th:text = "${request.user.getUsername()}" th:href = "@{/users/id/{strId}(strId = ${request.user.getId()})}" target='_blank' ></a></p></a>
+                            </th:block>
+                            <p class="card-text" th:text = "${request.getDescription().length()>350 ? request.getDescription().substring(0,350) + '...' : request.getDescription()}"></p>
+                            <p th:text="${'Создано: ' + #temporals.format(request.getDate(), 'dd.MM.yyyy - HH:mm') + ' (utc+5)'}"> </p>
+                            <p class="card-text" th:if = "${request.status} == 0">Статус:    <i class="icon-cogs"></i> Ожидает обработки </p>
+                            <p class="card-text" th:if = "${request.status} == 1">Статус:    <i class="icon-ok"></i> Завершено</p>
+                            <p class="card-text" th:if = "${request.status} == 2">Статус:    <i class="icon-time"></i> В обработке</p>
+                            <div class = "d-flex justify-content-between">
+                                <a class = "btn btn-dark bg-black" th:href = "@{/requests/id/{id}(id = ${request.getId()})}">Перейти</a>
+                                <a class = "btn btn-danger"
+                                   th:if = "${#authorization.expression('hasAuthority(''ADMIN'')')}"
+                                   th:href = "@{/requests/delete/id/{id}(id = ${request.getId()})}">Удалить</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </td>
+            </tr>
+        </table>
+    </th:block>
+
+    <nav aria-label="Pagination" th:if="${requests.totalPages gt 1}">
+        <ul class="pagination justify-content-center font-weight-medium">
+            <li class="page-item" th:classappend="${requests.number lt 2} ? 'disabled'">
+                <a class="page-link svg-icon"
+                   th:href="@{/users/id/{user_id}/1(user_id = ${user.getId()})}"
+                   aria-label="Previous"
+                   title="First Page" rel="tooltip">
+                    <i class="icon-double-angle-left"></i>
+                </a>
+            </li>
+            <li class="page-item" th:classappend="${requests.number eq 0} ? 'disabled'">
+                <a class="page-link svg-icon"
+                   th:href="@{/users/id/{user_id}/{id}(id=${requests.number lt 2 ? 1 : requests.number},user_id = ${user.getId()})}"
+                   aria-label="Previous"
+                   title="Previous Page" rel="tooltip">
+                    <i class="icon-angle-left"></i>
+                </a>
+            </li>
+            <li class="page-item" th:classappend="${i eq requests.number + 1} ? 'active'"
+                th:each="i : ${#numbers.sequence( requests.number + 1, requests.totalPages > 10 + requests.number ? requests.number + 10 : requests.totalPages, 1)}">
+                <a class="page-link" th:href="@{/users/id/{user_id}/{id}(id=${i},user_id = ${user.getId()})}" th:text="${i}"
+                   th:title="${'Page '+ i}"
+                   rel="tooltip"></a>
+            </li>
+            <li class="page-item disabled" th:if="${requests.number + 10 < requests.totalPages}">
+                <a class="page-link svg-icon" href="#">
+                    ...
+                </a>
+            </li>
+            <li class="page-item" th:classappend="${requests.number + 1 eq requests.totalPages} ? 'disabled'">
+                <a class="page-link svg-icon" th:href="@{/users/id/{user_id}/{id}(id=${requests.number + 2},user_id = ${user.getId()})}"
+                   aria-label="Next"
+                   title="Next Page" rel="tooltip">
+                    <i class="icon-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item" th:classappend="${requests.number gt (requests.totalPages - 2) } ? 'disabled'">
+                <a class="page-link svg-icon"
+                   th:href="@{/users/id/{user_id}/{id}(id=${requests.totalPages},user_id = ${user.getId()})}"
+                   aria-label="Previous"
+                   title="First Page" rel="tooltip">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!--    <div class="text-center">-->
+    <!--        <h3 th:text = "'Результаты по запросу: ' + ${searchQuery}"> </h3>-->
+    <!--    </div>-->
+
+
+
+</main>
+
+<div th:replace="base::footer"></div>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script th:src = "@{/js/role_select.js}"></script>
+
+</body>
+</html>

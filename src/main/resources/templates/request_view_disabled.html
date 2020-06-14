@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head >
+    <link th:href="@{/css/dialog.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
+    <link th:href="@{/css/theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" crossorigin="anonymous">
+    <link rel="stylesheet" th:href="@{/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{/css/uploader.css}">
+    <link rel="stylesheet" th:href="@{/css/jquery.dm-uploader.css}">
+    <meta name="viewport" content="width=400, initial-scale=0.9">
+    <meta th:content="${_csrf.token}" th:name="${_csrf.parameterName}"/>
+</head>
+<body>
+
+<div th:replace="base::sticky-header"></div>
+
+<input type="hidden" id = "login" th:value="${user.getUsername()}">
+<input type="hidden" id = "requestid" th:value="${request.getId()}">
+<input type="hidden" id = "userpost" th:value="${user.getPost()}">
+<input type="hidden" id = "fullname" th:value="${user.getFullname()}">
+
+<div class="container" style="padding-top:60px">
+
+    <div class="messaging">
+        <div class="inbox_msg justify-content-center d-flex">
+
+            <div class="mesgs">
+                    <div style = "border-bottom: 1px solid #dee2e6; padding-bottom: 15px;">
+                        <div>
+                            <p th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}" th:text="${request.user.getFullname() + ' : ' + request.user.getPost()}"></p>
+                            <h5>Тема заявки:</h5>
+                            <p th:text = "${request.getTitle()} "></p>
+                            <h5>Детали заявки:</h5>
+                            <p th:utext = "${request.getDescription()}"></p>
+                            <th:block th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')==false}">
+                                <h5>Статус:</h5>
+                                <h5 id = "text_status" class="card-text" th:if = "${request.getStatus()} == 0"> <i class="fas fa-cogs"></i> В обработке </h5>
+                                <h5 id = "text_status" class="card-text" th:if = "${request.getStatus()} == 1"> <i class="fas fa-check"></i> Завершено</h5>
+                                <h5 id = "text_status" class="card-text" th:if = "${request.getStatus()} == 2"> <i class="far fa-clock"></i> Ожидание ответа</h5>
+                            </th:block>
+                            <br>
+                            <p th:text="${#temporals.format(request.getDate(), 'dd.MM.yyyy - HH:mm') + ' (utc+5)'}"> </p>
+                        </div>
+
+                        <div class="text-center d-flex justify-content-between" style="padding-top: 5px; padding-bottom: 5px ;" th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}">
+                            <a class = "btn btn-dark"
+                               th:href = "@{/users/id/{strId}(strId = ${request.user.getId()})}" target='_blank' >Профиль</a>
+                            <!--/* <button th:style="${request.getStatus()==0 ? '' : 'display:none'}"  id="open_button" class="btn btn-danger bg-black white-text">Закрыть заявку</button>
+                            <button th:style="${request.getStatus()==1 ? '' : 'display:none'}"  id="close_button" class="btn btn-danger bg-black white-text">Открыть заявку</button> */-->
+                            <div style = "width: 180px;">
+                                <select id = "status_select" class="form-control">
+                                    <option th:selected="${request.getStatus()==2}" value="2">В обработке</option>
+                                    <option th:selected="${request.getStatus()==0}" value="0">Ожидает обработки</option>
+                                    <option th:selected="${request.getStatus()==1}" value="1">Завершено</option>
+
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                <div id="message_area">
+
+
+
+
+                    <!--/*    <th:block th:each = "message : ${messages}">
+                            <div th:if = "${#authorization.getAuthentication().getName()==message.user.getUsername()}" class="outgoing_msg">
+                                <div class="sent_msg">
+                                    <span th:if = "${message.getAttachments().isEmpty()}" class="time_date" th:text="${request.user.getFullname() + ': ' + request.user.getPost()}"></span>
+                                    <div th:if = "${message.getAttachments().isEmpty()}" class = "sent_msg_inner"><p th:text = "${message.getMessageText()}"></p></div>
+                                    <div th:if = "${!message.getAttachments().isEmpty()}">
+
+                                        <ul class="list-group">
+                                            <li class="list-group-item incoming_attach">
+                                                <a target="_blank" rel="nofollow noopener"
+                                                   th:href="@{${message.getAttachments()[0].getPaths()}}"
+                                                   class="d-flex justify-content-between"
+                                                   th:attrappend="image=${message.getAttachments().get(0).isImage()? 'true' : ''}"
+                                                   th:attrappend="id=${#strings.randomAlphanumeric(10)}">
+                                                    <span class="my-auto">_6bRDih0Og4 (1).jpg</span>
+                                                    <span class="far fa-file-image fa-2x"></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                    <span th:if = "${message.getAttachments().isEmpty()}" class="time_date" th:text="${#temporals.format(message.getDate(), 'dd.MM.yyyy - HH:mm') + ' (utc+5)'}"></span>
+                                </div>
+                            </div>
+
+
+                            <div th:unless = "${#authorization.getAuthentication().getName()==message.user.getUsername()}"class="incoming_msg">
+                                <div class="received_msg">
+                                    <div class="received_withd_msg">
+                                        <span class="time_date" th:text="${request.user.getFullname() + ': ' + request.user.getPost()}"></span>
+                                        <div class ="received_withd_msg_inner"><p th:text = "${message.getMessageText()}"></p></div>
+                                        <span class="time_date" th:text="${#temporals.format(message.getDate(), 'dd.MM.yyyy - HH:mm') + ' (utc+5)'}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </th:block>
+                    */-->
+                </div>
+                <div class="fixed-bottom type_msg">
+                    <form enctype="multipart/form-data" id="messageSendForm" name="messageSendForm">
+                        <div class="input_msg_write row justify-content-center">
+                            <div class = "movable" id = "movable">
+                                <!--/*<p>Изображения - больше 10 шт. и сумарно не больше 50 МБ. Файлы аналогично</p>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span id = "clear01" class="input-group-text">Изображения</span>
+                                    </div>
+                                    <div class="custom-file">
+                                        <input type="file" name = "images" class="custom-file-input" id="inputGroupFile01" accept="image/*" multiple>
+                                        <label id = "label01" class="custom-file-label text-truncate" for="inputGroupFile01" data-browse="Выбрать">Выберите изображения</label>
+                                    </div>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span id = "clear02" class="input-group-text">Файлы</span>
+                                    </div>
+                                    <div class="custom-file">
+                                        <input type="file" name = "files" class="custom-file-input" id="inputGroupFile02" multiple
+                                               accept="audio/*,video/*,.xlsx,.xls,.doc,.docx,.txt,.pdf,.7z,.rar,.zip">
+                                        <label id = "label02" class="custom-file-label text-truncate" for="inputGroupFile02" data-browse="Выбрать">Выберите файлы</label>
+                                    </div>
+                                </div> */-->
+                                <div class ="row" style = "margin: 0">
+                                    <div class="row w-100" style="margin-left: 0;margin-right:0">
+
+
+                                        <!-- Our markup, the important part here! -->
+                                        <div id="drag-and-drop-zone" class="dm-uploader w-100">
+                                            <h3 class="mb-4 mt-3 text-muted">Перетащите файлы сюда</h3>
+
+                                            <div class="btn btn-dark mb-5">
+                                                <span>Открыть проводник</span>
+                                                <input type="file" title='Click to add Files'/>
+                                            </div>
+                                        </div><!-- /uploader -->
+                                    </div>
+
+                                    <div class = "row w-100" style = "height: 250px; margin-left: 0;margin-right:0">
+
+                                        <div class="card h-100 w-100">
+                                            <div class="card-header">
+                                                <btn id="clear_queue" class = "btn btn-danger disabled w-25 d-block" style="margin:auto" disabled>Очистить</btn>
+                                            </div>
+
+                                            <ul class="list-unstyled p-2 d-flex flex-column col" id="files">
+                                                <li class="text-muted text-center empty">Ни один файл не загружен.</li>
+                                            </ul>
+                                        </div>
+
+                                    </div><!-- /file list -->
+                                </div>
+                            </div>
+                            <div class = "col-2" style = "padding-right: 0;">
+                                <button type="button" class="msg_send_btn left-rounded" id = "move_div" disabled>
+                                    <i class="fas fa-file-upload fa-2x"></i>
+                                </button>
+                            </div>
+                            <div class = "col-8" style = "padding-right: 0; padding-left: 0;">
+                                <textarea class = "form-control textarea-cfg" id="messageInput" disabled placeholder="Введите сообщение"></textarea>
+                            </div>
+                            <div class = "col-2" style = "padding-left: 0;">
+                                <button id = "send_button" class="msg_send_btn right-rounded" disabled type="button"><i id="send_button_icon" class="fa fa-paper-plane fa-2x" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Сообщение системы</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-message"></p>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script th:src="@{/js/magnific-popup.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+<script th:src="@{/js/jquery.dm-uploader.js}"></script>
+<script th:src="@{/js/demo-config.js}"></script>
+<script th:src="@{/js/demo-ui.js}"></script>
+<script th:src="@{/js/mess.js}"></script>
+
+<script type="text/html" id="files-template">
+    <li class="media">
+        <div class="media-body mb-1">
+            <button class = "btn btn-danger d-inline" %%remove%% style = "margin:5px">X</button>
+            <p class="mb-2 d-inline">
+                <strong>%%filename%%</strong> - Статус: <span class="text-muted">Ожидание</span>
+            </p>
+
+            <div class="progress mb-2">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                     role="progressbar"
+                     style="width: 0%"
+                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+            <hr class="mt-1 mb-1" />
+        </div>
+    </li>
+</script>
+
+<script type="text/html" id="debug-template">
+    <li class="list-group-item text-%%color%%"><strong>%%date%%</strong>: %%message%%</li>
+</script>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+
+<head>
+    <div th:replace="base::links"></div>
+</head>
+<body>
+    <div th:replace="base::header"></div>
+
+
+
+    <main role="main" class="container">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${successMessage}">
+            <strong>Сообщение системы:</strong>
+            <p th:text="${successMessage}"></p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="imput-comb text-center">
+            <a th:href="@{/requests/add}" class="btn btn-dark bg-black">Создать заявку</a>
+        </div>
+
+
+        <form th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}" th:action="@{/requests/search}" method="POST">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend" id = "select_div">
+                    <label class="input-group-text" for="mode_select">Поиск по</label>
+                    <select th:disabled="${requests.getTotalElements()==0}"
+                            name="mode" class="custom-select" id="mode_select">
+                        <option selected value="t">теме</option>
+                        <option value="d">описанию</option>
+                        <option value="n">имени</option>
+                        <option value="s">статусу</option>
+                    </select>
+                </div>
+                <input th:disabled="${requests.getTotalElements()==0}"
+                       type="text" name="search" class="form-control" required
+                       aria-label="Text input with segmented select and label"
+                       id = "query_input">
+                <button th:disabled="${requests.getTotalElements()==0}"
+                        type="submit" class="btn btn-outline-secondary">Найти</button>
+            </div>
+        </form>
+
+
+        <form th:unless = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}" th:action="@{/requests/search}" method="POST">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="mode_select">Поиск по</label>
+                    <select th:disabled="${requests.getTotalElements()==0}"
+                            name="mode" class="custom-select" id="mode_select">
+                        <option selected value="t">теме</option>
+                        <option value="d">описанию</option>
+                        <option value="s">статусу</option>
+                    </select>
+                </div>
+                <input th:disabled="${requests.getTotalElements()==0}"
+                       name="search" type="text" class="form-control" required
+                       aria-label="Text input with segmented select and label" id = "query_input">
+                <button th:disabled="${requests.getTotalElements()==0}"
+                        type="submit" class="btn btn-outline-secondary">Найти</button>
+            </div>
+        </form>
+
+<!--        //need to move it-->
+
+<!--        <div class="text-center">-->
+<!--            <h3>Результаты по запросу: "{{ search.body }}"</h3>-->
+<!--        </div>-->
+
+<!--        Отключилось видеонаблюдение.-->
+<!--        В блоке 6, первого здания, перестали работать камеры, предположительно дело в проводке которая проходит под лестницей на второй этаж.-->
+
+
+
+
+
+
+    <th:block th:if = "${requests != null && requests.getTotalElements() > 0}">
+        <table class="table table-striped">
+            <tr th:each = "request : ${requests}">
+                <td>
+                <div class="card">
+                    <h5 class="card-header" th:text = "${request.getTitle().length()>90 ? request.getTitle().substring(0,90) + '...' : request.getTitle()}"></h5>
+                    <div class="card-body">
+
+                        <th:block th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}">
+                            <h5 class="card-title" th:text = "${request.user.getFullname() + ' : ' + request.user.getPost()}">
+                            </h5>
+                            <p>Логин: <a style = "font-size: x-large" th:text = "${request.user.getUsername()}" th:href = "@{/users/id/{strId}(strId = ${request.user.getId()})}" target='_blank' ></a></p>
+                        </th:block>
+                        <p class="card-text" th:text = "${request.getDescription().length()>350 ? request.getDescription().substring(0,350) + '...' : request.getDescription()}"></p>
+                        <p th:text="${'Создано: ' + #temporals.format(request.getDate(), 'dd.MM.yyyy - HH:mm') + ' (utc+5)'}"> </p>
+                        <p class="card-text" th:if = "${request.status} == 0">Статус:    <i class="fas fa-cogs"></i> Ожидает обработки </p>
+                        <p class="card-text" th:if = "${request.status} == 1">Статус:    <i class="fas fa-check"></i> Завершено</p>
+                        <p class="card-text" th:if = "${request.status} == 2">Статус:    <i class="far fa-clock"></i> В обработке</p>
+                        <div class = "d-flex justify-content-between">
+                            <a class = "btn btn-dark bg-black" th:href = "@{/requests/id/{id}(id = ${request.getId()})}">Перейти</a>
+                            <a class = "btn btn-danger"
+                               th:if = "${#authorization.expression('hasAuthority(''ADMIN'')')}"
+                               th:href = "@{/requests/delete/id/{id}(id = ${request.getId()})}">Удалить</a>
+                        </div>
+
+                    </div>
+                </div>
+
+                </td>
+            </tr>
+        </table>
+    </th:block>
+
+    <th:block th:if = "${requests != null && requests.getTotalElements()==0}">
+        <p><em th:text = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')') ? 'Список заявок пуст, пора набирать клиентов!' : 'Вы еще не оставили ни одной заявки'}"></em></p>
+    </th:block>
+        <!--*/
+        <div th:if = "${requests.getSize() != 0}" class="text-center">
+
+            <a th:if = "${!requests.isFirst()}"
+               class="btn btn-dark bg-black"
+               th:href="@{/requests/1}">
+                <i class="icon-double-angle-left icon-2x"></i>
+            </a>
+
+            <a th:unless = "${requests.isFirst()}"
+               class="btn btn-dark bg-black"
+               th:href="@{/requests/{id}(id = ${requests.getNumber()-1})}">
+                <i class="icon-angle-left icon-2x"></i>
+            </a>
+
+            <th:block th:if="${ (requests.getTotalPages() > 4) && (requests.getNumber() > 4) }">
+                <a class="btn btn-dark bg-black" th:href="@{/requests/{page}(page = ${requests.getNumber()-2})}"
+                   th:text = "${requests.getNumber()-2}"></a>
+                <a class="btn btn-dark bg-black" th:href="@{/requests/{page}(page = ${requests.getNumber()-1})}"
+                    th:text = "${requests.getNumber()-1}"></a>
+                <a class="btn btn-dark bg-black"
+                   style = 'font-weight: bolder; font-size: 18pt;'
+                   th:text = "${requests.getNumber()}"></a>
+                <a class="btn btn-dark bg-black" th:href="@{/requests/{page}(page = ${requests.getNumber()+1})}"
+                   th:text = "${requests.getNumber()+1}"></a>
+                <a class="btn btn-dark bg-black" th:href="@{/requests/{page}(page = ${requests.getNumber()+2})}"
+                   th:text = "${requests.getNumber()+2}"></a>
+            </th:block>
+
+
+            <a th:if = "${requests.hasNext()}"
+               class="btn btn-dark bg-black"
+               th:href="@{/requests/{page}(page = ${requests.getNumber() + 1})}">
+                <i class="icon-angle-right icon-2x"></i>
+            </a>
+
+            <a th:if = "${!requests.isLast()}"
+               class="btn btn-dark bg-black"
+               th:href="@{/requests/{page}(page = ${requests.getTotalPages() - 1})}">
+                <i class="icon-double-angle-right icon-2x"></i>
+            </a>
+
+        </div>
+        /*-->
+
+        <nav aria-label="Pagination" th:if="${requests.totalPages gt 1}">
+            <ul class="pagination justify-content-center font-weight-medium">
+                <li class="page-item" th:classappend="${requests.number lt 2} ? 'disabled'">
+                    <a class="page-link svg-icon"
+                       th:href="@{/requests/1}"
+                       aria-label="Previous"
+                       title="First Page" rel="tooltip">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${requests.number eq 0} ? 'disabled'">
+                    <a class="page-link svg-icon"
+                       th:href="@{/requests/{id}(id=${requests.number lt 2 ? 1 : requests.number})}"
+                       aria-label="Previous"
+                       title="Previous Page" rel="tooltip">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${i eq requests.number + 1} ? 'active'"
+                    th:each="i : ${#numbers.sequence( requests.number + 1, requests.totalPages > 10 + requests.number ? requests.number + 10 : requests.totalPages, 1)}">
+                    <a class="page-link" th:href="@{/requests/{id}(id=${i})}" th:text="${i}"
+                       th:title="${'Page '+ i}"
+                       rel="tooltip"></a>
+                </li>
+                <li class="page-item disabled" th:if="${requests.number + 10 < requests.totalPages}">
+                    <a class="page-link svg-icon" href="#">
+                        ...
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${requests.number + 1 eq requests.totalPages} ? 'disabled'">
+                    <a class="page-link svg-icon" th:href="@{/requests/{id}(id=${requests.number + 2})}"
+                       aria-label="Next"
+                       title="Next Page" rel="tooltip">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${requests.number gt (requests.totalPages - 2) } ? 'disabled'">
+                    <a class="page-link svg-icon"
+                       th:href="@{/requests/{id}(id=${requests.totalPages})}"
+                       aria-label="Previous"
+                       title="First Page" rel="tooltip">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+    </main>
+
+    <div th:replace="base::footer"></div>
+    <script th:src="@{/js/request_select.js}"></script>
+</body>
+</html>

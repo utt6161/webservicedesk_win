@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <div th:replace="base::links"></div>
+</head>
+<body>
+<div th:replace="base::header"></div>
+
+<main role="main" class="container">
+
+    <div class="imput-comb text-center">
+        <a th:href="@{/requests/submit}" class="btn btn-dark bg-black">Создать заявку</a>
+    </div>
+
+
+    <form th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}" th:action="@{/requests/search}" method="POST">
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="inputGroupSelect01">Поиск по</label>
+                <select name="mode" class="custom-select" id="inputGroupSelect01">
+                    <option selected value="t">теме</option>
+                    <option value="d">описанию</option>
+                    <option value="n">имени</option>
+                    <option value="s">статусу</option>
+                </select>
+            </div>
+            <input th:value="${searchQuery}"
+                   type="text" name="search" class="form-control" aria-label="Text input with segmented select and label">
+            <button type="submit" class="btn btn-outline-secondary">Найти</button>
+        </div>
+    </form>
+
+
+    <form th:unless = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}" th:action="@{/requests/search}" method="POST">
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="inputGroupSelect02">Поиск по</label>
+                <select name="mode" class="custom-select" id="inputGroupSelect02">
+                    <option selected value="t">теме</option>
+                    <option value="d">описанию</option>
+                    <option value="s">статусу</option>
+                </select>
+            </div>
+            <input th:value="${searchQuery}"
+                   name="search" type="text" class="form-control" aria-label="Text input with segmented select and label">
+            <button type="submit" class="btn btn-outline-secondary">Найти</button>
+        </div>
+    </form>
+
+    <h3 th:unless = "${status_error}"><em>Поиск не принес результата повторить еще?</em></h3>
+    <h3 th:if = "${status_error}"><em th:text = "${status_error}"></em></h3>
+
+</main>
+
+<div th:replace="base::footer"></div>
+</body>
+</html>

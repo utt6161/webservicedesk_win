@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5" xmlns:v-on="http://www.w3.org/1999/xhtml">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/index_auth.css">
+
+    <title> ??? &rsaquo; Service Desk </title>
+</head>
+
+<body class = "container" >
+
+<div class="row h-100 justify-content-center align-items-center" id = "app">
+
+    <div class="center-block">
+        <div class="text-center padding-bottom-5">
+            <p class="a-name">ООО «СКА-Сфера»</p>
+            <p class="a-name a-name-small">Web Service Desk</p>
+        </div>
+
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${message}">
+            <strong>Сообщение системы:</strong>
+            <p th:text="${message}"></p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${#fields.hasErrors('${password.*}')}">
+            <p><strong>Сообщение системы:</strong></p>
+            <p th:errors="*{password.password}"></p>
+
+            <p th:errors="*{password.password_match}"></p>
+
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="tab-content height-100 d-flex justify-content-center align-items-center" id="myTabContent">
+            <div class = "text-center d-block">
+                <form v-on:submit="submit" th:object="${password}" th:action="@{/reset/{token}(token=${token})}" method="post" name = "forgot" id = "forgot">
+                    <p class="a-name-small">Введите новый пароль</p>
+                    <div>
+                        <div class="form-group">
+                            <label for="password">Пароль</label>
+                            <input id="password" th:field="*{password}"
+                                   v-model="$v.password.$model" :class="status($v.password)" autocomplete="new-password"
+                                   name="password" type="password"
+                                   aria-describedby="passwordHelpBlock"
+                                   class="form-control here">
+                            <span class = "help is-danger" v-if="!$v.password.required && $v.password.$dirty">
+                                        Поле обязательно к заполнению
+                                    </span>
+                            <span class = "help is-danger" v-else-if="!$v.password.minLength">
+                                        Минимально допустимое число символов: <% $v.password.$params.minLength.min %>
+                                    </span>
+                            <span class = "help is-danger" v-else-if="!$v.password.maxLength">
+                                        Максимально допустимое число символов: <% $v.password.$params.maxLength.max %>
+                                    </span>
+                            <span class = "help is-danger" v-else-if="!$v.password.strongPass && $v.password.$dirty">
+                                Пароль как минимум должен содержать: <br>
+                                Одну цифру <br>
+                                Одну прописную латинскую букву <br>
+                                Одну заглавную латинскую букву <br>
+                                Один спец. символ( @ # $ % ^ & + = ).
+                            </span>
+
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="form-group">
+                            <label for="password_match">Подтвердите пароль</label>
+                            <input id="password_match" th:field="*{password_match}"
+                                   v-model="$v.password_match.$model" :class="status($v.password_match)" autocomplete="new-password"
+                                   name="password" type="password"
+                                   aria-describedby="passwordHelpBlock"
+                                   class="form-control here">
+                            <span class = "help is-danger" v-if="!$v.password_match.sameAs">
+                                Вы не подтвердили пароль
+                            </span>
+                        </div>
+                    </div>
+                    <button form = "forgot" type="submit" name = "btn" class="btn btn-dark bg-black">Восстановить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
+
+<script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
+
+<script th:src="@{/js/vuelidate.min.js}"></script>
+
+<script th:src="@{/js/validators.min.js}"></script>
+
+<script th:src="@{/js/validate_pass.js}"></script>
+</body>
+
+</html>

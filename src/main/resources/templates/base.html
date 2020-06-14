@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+
+<head>
+    <th:block th:fragment="links">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+              integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" crossorigin="anonymous">
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+        <title>Service Desk</title>
+    </th:block>
+</head>
+
+<body>
+<div th:fragment="header">
+    <nav class="navbar navbar-expand-md navbar-dark bg-black">
+        <div class="container">
+            <div class="text-center">
+                <a th:href="@{/requests}" class="a-name" th:text = "${site.company_name}"></a>
+                <a th:href="@{/requests}" class="a-name a-name-small">Web Service Desk</a>
+            </div>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+                    aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div style = "padding-left: 15px; padding-top:7px; color: white; padding-right: 15px;">
+                <p style = "margin:0;"><i class="fas fa-phone-volume"></i> <span th:text ="${site.phone_number}"></span> </p>
+                <p style = "margin:0;"><i class="fas fa-envelope-square"></i> <span th:text ="${site.email}"></span> </p>
+            </div>
+
+            <div class = "d-flex align-center" th:if = "${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                <a th:href="@{/edit_site_data}" class="btn btn-light">Изменить</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                <ul class="navbar-nav ml-auto">
+
+                    <li class="nav-item dropdown">
+                        <a href="#." class="dropdown-toggle nav-link side-link" data-toggle="dropdown" th:text="${#authentication.getPrincipal().getUsername()}">
+                            <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li class="d-flex justify-content-center">
+                                <a class="dropdown-item text-center" th:href="@{/logout}">Выйти</a>
+                            </li>
+                        </ul>
+                    </li>
+
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+
+    <div class="navigation">
+        <ul class="nav nav-tabs justify-content-center">
+            <li class="nav-item ">
+                <a th:classappend="${#httpServletRequest.requestURI.contains('requests') ? 'active':''}"
+                   class="nav-link dark medium-font"
+                   th:href="@{/requests}"
+                   th:text = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')') ? 'Заявки' : 'Ваши заявки' }">
+                </a>
+            </li>
+
+            <li class="nav-item"
+                th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}">
+                <a class="nav-link dark medium-font"
+                   th:href="@{/users}"
+                   th:classappend="${#httpServletRequest.requestURI.contains('users') ? 'active':''}">Пользователи</a>
+            </li>
+
+
+        </ul>
+    </div>
+</div>
+
+
+<div th:fragment="sticky-header">
+    <div class = "fixed-top">
+        <nav class="navbar navbar-expand-md navbar-dark bg-black">
+            <div class="container d-flex justify-content-around">
+
+                <div class="text-center">
+                    <a th:href="@{/requests}" class="a-name"th:text = "${site.company_name}"></a>
+                    <a th:href="@{/requests}" class="a-name a-name-small">Web Service Desk</a>
+                </div>
+
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+                        aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div style = "padding-left: 15px; padding-top:7px; color: white; padding-right: 15px; ">
+                    <p style = "margin:0;"><i class="fas fa-phone-volume"></i> <span th:text ="${site.phone_number}"></span> </p>
+                    <p style = "margin:0;"><i class="fas fa-envelope-square"></i> <span th:text ="${site.email}"></span> </p>
+                </div>
+
+                <div class = "d-flex align-center" th:if = "${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                    <a th:href="@{/edit_site_data}" class="btn btn-light">Изменить</a>
+                </div>
+
+
+                <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                    <ul class="navbar-nav ml-auto">
+
+                        <li class="nav-item dropdown">
+                            <a href="#." class="dropdown-toggle nav-link side-link" data-toggle="dropdown" th:text="${#authentication.getPrincipal().getUsername()}">
+                                <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li class="d-flex justify-content-center">
+                                    <a class="dropdown-item text-center" th:href="@{/logout}">Выйти</a>
+                                </li>
+                            </ul>
+                        </li>
+
+
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+        <div class="navigation" style = "background-color: white">
+                <ul class="nav nav-tabs justify-content-center">
+                    <li class="nav-item ">
+                        <a th:classappend="${#httpServletRequest.requestURI.contains('requests') ? 'active':''}"
+                           class="nav-link dark medium-font"
+                           th:href="@{/requests}"
+                           th:text = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')') ? 'Заявки' : 'Ваши заявки' }">
+                        </a>
+                    </li>
+
+                    <li class="nav-item"
+                        th:if = "${#authorization.expression('hasAnyAuthority(''ADMIN'',''EDIT'')')}">
+                        <a class="nav-link dark medium-font"
+                           th:href="@{/users}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('users') ? 'active':''}">Пользователи</a>
+                    </li>
+
+                    <!--/*
+                    <li class="nav-item " th:if = "${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                        <a class="nav-link dark medium-font"
+                           th:href="@{/complex}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('complex') ? 'active':''}">Комплексные заявки</a>
+                    </li>
+                    */-->
+                </ul>
+
+        </div>
+</div>
+</div>
+
+
+<div th:fragment="footer">
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <p class="text-muted">
+                    Контакты: <span th:text = "${site.phone_number}"></span>,
+                    <span th:text = "${site.email}"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</div>
+</body>
+
+</html>

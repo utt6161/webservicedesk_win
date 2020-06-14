@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <div th:replace="base::links"></div>
+    <link rel="stylesheet" th:href="@{/css/request_add.css}">
+</head>
+<body>
+<div th:replace="base::header"></div>
+
+<main role="main" class="container">
+
+    <div class="form-group form-container">
+        <form method="POST" th:action = "@{/edit_site_data}" enctype="multipart/form-data">
+            <div class="input-comb">
+                <label for="comp">Компания: </label>
+                <input type="text" name = "company" class="form-control" id="comp" th:value = "${site.company_name}">
+            </div>
+            <div class="input-comb">
+                <label for="fio_input">Телефон:</label>
+                <input type="text" name = "phone" class="form-control" id="fio_input" th:value = "${site.phone_number}">
+            </div>
+            <div class="input-comb">
+                <label for="post_input">Email:</label>
+                <input type="text" name = "email" class="form-control" id="post_input" th:value = "${site.email}">
+            </div>
+            <button type='submit' class="btn btn-dark bg-black" style = "maring-top:15px">Сохранить</button>
+        </form>
+    </div>
+
+
+
+
+</main>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script th:src = "@{/js/req_clear.js}"></script>
+<div th:replace="base::footer"></div>
+</body>
+</html>

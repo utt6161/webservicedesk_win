@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <div th:replace="base::links"></div>
+    <link rel="stylesheet" th:href="@{/css/request_add.css}">
+</head>
+<body>
+<div th:replace="base::header"></div>
+
+<main role="main" class="container">
+
+    <div class="form-group form-container">
+        <h3>Опишите вашу проблему: </h3>
+        <form method="POST" enctype="multipart/form-data" th:action="@{/requests/add}">
+            <div class="imput-comb">
+                <label for="title">Тема заявки</label>
+                <input class = 'form-control' id='title' name="title" placeholder="Что-нибудь обобщающее" required>
+            </div>
+            <div class="imput-comb">
+                <label for="exampleFormControlTextarea1">Детали</label>
+                <textarea required placeholder="Чем больше деталей будет предоставлено, тем проще будет всем нам" name="description" class="form-control" id="exampleFormControlTextarea1" rows="7" style="resize: none;"></textarea>
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span id = "clear01" class="input-group-text">Файлы</span>
+                </div>
+                <div class="custom-file">
+                    <input type="file" name = "files" class="custom-file-input" id="inputGroupFile01" multiple>
+                    <label id = "label01" class="custom-file-label text-truncate" for="inputGroupFile01" data-browse="Выбрать">При необходимости, прикрепите файлы</label>
+                </div>
+            </div>
+            <button type='submit' class="btn btn-dark bg-black">Отправить</button>
+        </form>
+    </div>
+
+
+
+
+</main>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script th:src = "@{/js/req_clear.js}"></script>
+<div th:replace="base::footer"></div>
+</body>
+</html>

@@ -1,0 +1,115 @@
+.card{
+    max-width: 100%;
+}
+
+a.nav-link.side-link{
+    color: white;
+    transition: 0.2s ease;
+}
+
+a.nav-link.side-link:hover{
+    text-decoration: none;
+    color: #bebebe;
+}
+
+.white-text{
+    color:white !important;
+}
+
+.a-name{
+    display: block;
+    font-size: 23px;
+    letter-spacing: -2px;
+    font-weight: 500;
+    padding: 0px;
+    color: #ffffff;
+    text-decoration:none;
+    transition: 0.2s ease;
+}
+.a-name-small{
+    letter-spacing: 0px;
+    font-weight: 400;
+    font-size: 14px;
+}
+.dark{
+    color: black;
+}
+
+.a-name:hover{
+    text-decoration: none;
+    color: #bebebe;
+}
+
+
+.bd-placeholder-img {
+    font-size: 1.125rem;
+    text-anchor: middle;
+}
+
+#sysinfo {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+    }
+}
+
+.dropdown-menu{
+    border-radius: 0px;
+    border:none;
+    transition: 0.2s ease-in-out;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+.dropdown-item{
+    width: 95%;
+    text-decoration: none;
+    color: black;
+    transition: 0.2s ease;
+}
+.dropdown-item:hover{
+    border-radius: 6px;
+    background-color: #d6d6d6;
+}
+main.container{
+    min-height: 76vh;
+    padding-top: 5px;
+}
+
+.navigation{
+    padding-top: 5px;
+}
+
+.bg-black{
+    background-color: black;
+}
+.medium-font{
+    font-size: 25px;
+}
+
+.small-font{
+    font-size: 20px;
+}
+
+@media(min-width: 450px) {
+    .form-container {
+        padding-left: 55px;
+        padding-right: 55px;
+    }
+}
+
+.imput-comb{
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+.edit-icon{
+    color:white;
+    transition: 0.2s ease;
+}
+.edit-icon:hover{
+    background-color: white;
+    color: black;
+}
+
