@@ -1,5 +1,2 @@
-# webservicedesk_win
-windows vers
->"Help people interested in this repository understand your project by adding a README."
-
-no, i wont
+# Web Service Desk
+My college diplima project that implements a service which enables company to have a real-time link with their employees through a ticket-based system with chat based on sockets.
